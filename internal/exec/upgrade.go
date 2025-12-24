@@ -53,7 +53,7 @@ func Upgrade(dir string, v string) {
 	rst := reg.FindAllSubmatch(content, -1)
 
 	for _, group := range rst {
-		if len(group) != 2 {
+		if len(group) != 1 {
 			continue
 		}
 
