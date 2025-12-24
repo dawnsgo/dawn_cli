@@ -1,0 +1,71 @@
+package exec
+
+import (
+	"fmt"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"time"
+
+	"github.com/dawnsgo/dawn_cli/internal/log"
+	"github.com/dawnsgo/dawn_cli/internal/mod/base"
+	"github.com/dawnsgo/dawn_cli/internal/os"
+	"github.com/dawnsgo/dawn_cli/internal/version"
+)
+
+const (
+	upgradeFailure = "upgrade failure"
+	upgradeSuccess = "upgrade success"
+)
+
+// Upgrade 升级框架
+func Upgrade(dir string, v string) {
+	if !os.IsDir(dir) {
+		log.Fatal(upgradeFailure, "the dir is not a directory")
+	}
+
+	mod := filepath.Join(dir, "go.mod")
+
+	if !os.IsFile(mod) {
+		log.Fatal(upgradeFailure, "the go.mod file does not exist")
+	}
+
+	content, err := os.ReadFile(mod)
+	if err != nil {
+		log.Fatal(upgradeFailure, err)
+	}
+
+	full, major, sha, err := version.ParseDawnVersion(v)
+	if err != nil {
+		log.Fatal(upgradeFailure, err)
+	}
+
+	pkg := fmt.Sprintf("%s/%s@%s", base.Package, major, full)
+	cmd := exec.Command("go", "get", pkg)
+	cmd.Dir = dir
+	cmd.WaitDelay = 30 * time.Second
+
+	if _, err = cmd.Output(); err != nil {
+		log.Fatal(upgradeFailure, err)
+	}
+
+	reg := regexp.MustCompile(fmt.Sprintf(`(%s/\w+/\w+)/v\d+`, base.Package))
+	rst := reg.FindAllSubmatch(content, -1)
+
+	for _, group := range rst {
+		if len(group) != 2 {
+			continue
+		}
+
+		pkg = fmt.Sprintf("%s/%s@%s", group[1], major, sha)
+		cmd = exec.Command("go", "get", pkg)
+		cmd.Dir = dir
+		cmd.WaitDelay = 30 * time.Second
+
+		if _, err = cmd.Output(); err != nil {
+			log.Fatal(upgradeFailure, err)
+		}
+	}
+
+	log.Info(upgradeSuccess)
+}
