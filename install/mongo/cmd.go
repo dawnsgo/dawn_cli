@@ -14,8 +14,8 @@ var Command = &cli.Command{
 	},
 	Action: func(ctx *cli.Context) error {
 		exec.Install(exec.Package{
-			Name:    "mongo-dao-generator",
-			Module:  "github.com/dawnsgo/mongo-dao-generator",
+			Name:    "mongo_dao_generator",
+			Module:  "github.com/dawnsgo/mongo_dao_generatorr",
 			Version: ctx.String(flag.Version.Name),
 		})
 

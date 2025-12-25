@@ -14,8 +14,8 @@ var Command = &cli.Command{
 	},
 	Action: func(ctx *cli.Context) error {
 		exec.Install(exec.Package{
-			Name:    "gorm-dao-generator",
-			Module:  "github.com/dawnsgo/gorm-dao-generator",
+			Name:    "gorm_dao_generator",
+			Module:  "github.com/dawnsgo/gorm_dao_generator",
 			Version: ctx.String(flag.Version.Name),
 		})
 
